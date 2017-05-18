@@ -1,14 +1,8 @@
 package sket.controllers;
 
-import sket.model.action.Authenticator;
-import sket.model.data.User;
+import org.json.JSONObject;
 
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 
 public class GameController extends HttpServlet {
 
@@ -16,4 +10,13 @@ public class GameController extends HttpServlet {
         super();
     }
 
+    /* 랜덤 출제자를 json 으로 반환 */
+    public static String randomExaminerToJSON(String id, int roomId) {
+        JSONObject message = new JSONObject();
+        message.put("type", "randomExaminer");
+        message.put("id", id);
+        message.put("roomId", roomId);
+
+        return message.toString();
+    }
 }

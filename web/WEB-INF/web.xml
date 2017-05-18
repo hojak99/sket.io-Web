@@ -1,9 +1,51 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
-         version="3.1">
+<web-app
+        xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
+        version="3.1">
+
     <display-name>Apache-Axis</display-name>
+
+    <!-- SignUpCotroller 는 signup.do 로 매핑 -->
+    <servlet>
+        <servlet-name>SignUpController</servlet-name>
+        <servlet-class>sket.controllers.SignUpController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>SignUpController</servlet-name>
+        <url-pattern>/signup.do</url-pattern>
+    </servlet-mapping>
+    <servlet>
+        <servlet-name>GuestController</servlet-name>
+        <servlet-class>sket.controllers.GuestController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>GuestController</servlet-name>
+        <url-pattern>/singin/guest</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <display-name>GoogleLoginController</display-name>
+        <servlet-name>GoogleLoginController</servlet-name>
+        <servlet-class>sket.controllers.GoogleLoginController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>GoogleLoginController</servlet-name>
+        <url-pattern>/signin/google/</url-pattern>
+    </servlet-mapping>
+    <servlet>
+        <display-name>FBLoginController</display-name>
+        <servlet-name>FBLoginController</servlet-name>
+        <servlet-class>sket.controllers.FBLoginController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>FBLoginController</servlet-name>
+        <url-pattern>/signin/facebook/</url-pattern>
+    </servlet-mapping>
+    <welcome-file-list>
+        <welcome-file>index.html</welcome-file>
+    </welcome-file-list>
     <servlet>
         <display-name>Apache-Axis Servlet</display-name>
         <servlet-name>AxisServlet</servlet-name>
@@ -49,4 +91,5 @@
         <extension>wsdl</extension>
         <mime-type>text/xml</mime-type>
     </mime-mapping>
+
 </web-app>
