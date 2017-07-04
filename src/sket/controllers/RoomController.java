@@ -3,11 +3,8 @@ package sket.controllers;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import sket.model.action.PlayerAction;
-import sket.model.action.SessionManager;
 import sket.model.data.Player;
 import sket.model.data.Room;
-
-import javax.websocket.Session;
 
 public class RoomController {
 
@@ -15,89 +12,124 @@ public class RoomController {
         super();
     }
 
-    /* 방 생성하는 메소드 */
-    public static Room createRoom(String name, boolean isLock, String pwd, String masterId) {
-        // 방 생성 코드. Room 생성자 안에 roomList 에 방 추가하는 코드 작성되있음.
+    public static String noEnterRoom(String id) {
+        JSONObject message = new JSONObject();
+        message.put("type", "NO_ENTER_ROOM");
 
-        Room room = new Room(name, PlayerAction.getEqualPlayerId(masterId), Room.getCountRoomId(), isLock, pwd);
+        JSONObject data = new JSONObject();
+        data.put("id", id);
+        message.put("data", data);
+
+        return message.toString();
+    }
+
+    /* 방 인원 0명일 시 방 삭제 */
+    public static String removeRoomByJSON(Room targetRoom) {
+        JSONObject message = new JSONObject();
+        message.put("type", "REMOVE_ROOM");
+
+        JSONObject data = new JSONObject();
+        data.put("roomId", targetRoom.getRoomId());
+        message.put("data", data);
+
+        return message.toString();
+    }
+
+
+    /* 방 생성하는 메소드 */
+    public static Room createRoom(String name, boolean isLock, String pwd, String masterId, int userMax, int timeLimit, int roundLimit) {
+        // 방 생성 코드. Room 생성자 안에 roomList 에 방 추가하는 코드 작성되있음.
+        Room room = new Room(
+                name, PlayerAction.getEqualPlayerId(masterId),
+                Room.getCountRoomId(),
+                isLock, pwd, userMax, timeLimit, roundLimit);
         Player player = PlayerAction.getEqualPlayerId(masterId);
-        player.setRoomMaster(true);
+        player.setMaster(true);
 
         return room;
     }
 
     /* 방 정보 json 으로 반환하는 메소드 */
-    public static JSONObject getRoomInfoToJSON(Room targetRoom) {
-        JSONObject object = new JSONObject();
-        object.put("roomId", targetRoom.getRoomId());
-        object.put("name", targetRoom.getRoomName());
-        object.put("lock", targetRoom.isLocked());
-        object.put("password", targetRoom.getRoomPwd());
-        object.put("playerNumber", targetRoom.getTotalUserNumber());
-        object.put("roomMaster", targetRoom.getRoomId());
+    public static String getRoomInfoToJSON(Room targetRoom) {
+        JSONObject message = new JSONObject();
+        message.put("type", "ROOM_INFO");
+
+        JSONObject data = new JSONObject();
+        data.put("roomId", targetRoom.getRoomId());
+        data.put("roomName", targetRoom.getRoomName());
+        data.put("numRound", targetRoom.getRoundLimit());
+        data.put("timeLimit", targetRoom.getTimeLimit());
+        data.put("userNumLimit", targetRoom.getUserMax());
+        data.put("roomMaster", targetRoom.getRoomMaster().getId());
+        data.put("userNum", targetRoom.getTotalUserNumber());
         JSONArray jsonArray = new JSONArray();
 
         for (Player player : Room.getRoomIntoPlayer(targetRoom)) {
             JSONObject temp = new JSONObject();
+            temp.put("nick", player.getNickname());
+            temp.put("picture", player.getPicture());
+            temp.put("level", player.getPlayerLevel());
+            temp.put("isReady", player.isReady());
             temp.put("id", player.getId());
+            temp.put("master", player.isMaster());
+            temp.put("score", player.getScore());
             jsonArray.put(temp);
         }
 
-        object.put("playerList", jsonArray);
-        return object;
+        data.put("playerList", jsonArray);
+        message.put("data", data);
+        return message.toString();
     }
 
     /* 방 목록을 json 으로 보내는 메소드 */
     public static String getRoomListAsJSON() {
-        JSONObject message = new JSONObject();
-        message.put("type", "roomList");
-        JSONArray jsonArray = new JSONArray();
-
         System.out.println("log : 방 목록 리스트 사이즈 : " + Room.getRoomList().size());
 
-        /* 방생성 테스트 코드 */
-        // RoomController.createRoom("방제목", false, null, "아디");
-        // RoomController.createRoom("방제목1", true, "123123", "아디");
+        JSONObject message = new JSONObject();
+        message.put("type", "ROOM_LIST");
+
+        JSONObject data = new JSONObject();
+        JSONArray jsonArray = new JSONArray();
 
         if (Room.getRoomList().size() == 0) {
-            message.put("size", 0);
+            data.put("size", 0);
+            message.put("data", data);
             return message.toString();
         }
 
         for (Room room : Room.getRoomList()) {
-            JSONObject object = new JSONObject();
-            object.put("roomId", room.getRoomId());
-            object.put("name", room.getRoomName());
-            object.put("lock", room.isLocked());
-            object.put("password", room.getRoomPwd());
-            object.put("playerNumber", room.getTotalUserNumber());
+            if (room.isPlayingGame() == false) {
+                JSONObject object = new JSONObject();
+                object.put("roomId", room.getRoomId());
+                object.put("roomName", room.getRoomName());
+                object.put("round", room.getCurRound());
+                object.put("roundLimit", room.getRoundLimit());
+                object.put("timeLimit", room.getTimeLimit());
+                object.put("userNumLimit", room.getUserMax());
+                object.put("userNum", room.getTotalUserNumber());
+                object.put("isLocked", room.isLocked());
+                object.put("password", room.getRoomPwd());
 
-            jsonArray.put(object);
+                jsonArray.put(object);
+            }
         }
 
-        message.put("roomList", jsonArray);
+        data.put("roomList", jsonArray);
+        message.put("data", data);
+
+        System.out.println(message.toString());
         return message.toString();
+    }
 
-        /*
-            다음과 같이 json 보낸다.
+    public static String getRoomStartQuizToJSON(int round, boolean isGameEnd) {
+        JSONObject message = new JSONObject();
+        message.put("type", "START_QUIZ");
 
-            {
-	        "type": "roomList",
-	        "roomList": [{
-		        "playerNumber": 0,
-		        "password": "null",
-		        "name": "방제목",
-		        "lock": false,
-		        "roomId": 0
-	        }, {
-		        "playerNumber": 0,
-		        "password": "123123",
-		        "name": "방제목1",
-		        "lock": true,
-		        "roomId": 1
-	        }]
-        }
+        JSONObject data = new JSONObject();
+        data.put("round", round);
+        data.put("gameEnd", isGameEnd);
 
-        */
+        message.put("data", data);
+        return message.toString();
     }
 }

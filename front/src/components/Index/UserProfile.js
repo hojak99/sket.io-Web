@@ -1,52 +1,46 @@
 import React, { Component, PropTypes } from 'react';
+import { PropTypes as ReactPropTypes } from 'prop-types';
 
 const propTypes = {
-    divStyle: React.PropTypes.string
+    divStyle: React.PropTypes.string,
+    user: ReactPropTypes.object
 };
 
 const defaultProps = {
-    divStyle: ''
+    divStyle: '',
+    user: {
+        nick: 'GUEST',
+        level: 1,
+        curExp: 0,
+        limitExp: 300,
+        totalExp: 0
+    }
 };
 
 class UserProfile extends Component {
     constructor(props) {
         super(props);
     }
-    render() {
-        const indexStyle = {
-            width: '20%',
-            height: '20%',
-            backgroundColor: 'skyblue',
 
-            float: 'left'
+    render() {
+        let profileImage;
+
+        if (this.props.user.type === 'LOGIN_GUEST' || typeof this.props.user.picture === 'undefined') {
+            profileImage = ( <img src={'img/guest-profile.png'} alt="error"/> )
+        } else {
+            profileImage = ( <img src={ this.props.user.picture } alt="error"/> )
         }
 
-        const gameStyle = {
-            width: '100%',
-            height: '50%',
-            float: 'none',
-            backgroundColor: 'lightgreen'
-        };
-
-        let divStyle = {};
-
-        if (this.props.divStyle === 'sket-player') divStyle = gameStyle;
-        else divStyle = indexStyle;
-
         return(
-            <div className="sket-profile" style={divStyle}>
+            <div id="sket-profile" className="component-container index-left index-top">
                 <div className="profile-image">
-                    <img src={"../logo.svg"} alt="error"/>
+                    { profileImage }
                 </div>
 
                 <div className="user-info">
-                    GUEST7777
-                </div>
-                <div className="user-info">
-                    Lv.1
-                </div>
-                <div className="user-info">
-                    exp bar
+                    <p>{ this.props.user.nick }</p>
+                    <p>Lv.{ this.props.user.level }</p>
+                    <p>{ this.props.user.curExp } / { this.props.user.limitExp }</p>
                 </div>
             </div>
         );

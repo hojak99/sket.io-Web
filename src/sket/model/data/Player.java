@@ -1,71 +1,142 @@
 package sket.model.data;
 
-import javax.websocket.Session;
 import java.util.ArrayList;
 
 /**
- * Created by KwonJH on 2017-04-13.
+ * Created on 2017-04-13.
  */
 public class Player {
     public static ArrayList<Player> playerArrayList = new ArrayList<>();
 
-    private String id;
-    private boolean roomMaster = false;
-    private boolean examiner = false;
-    private Session session;
-    private boolean isReady = false;
-    private int playerScore = 0;
-    private boolean isGuest = false;
+    private String id; // guest는 100부터 or oauthID
+    private String nickname;
+    private String picture;
+    private String sessionID;
 
-    public Player(String id, boolean roomMaster, Session session, boolean isGuest) {
+    private int score = 0;
+    private boolean isMaster = false;
+    private boolean isExaminer = false;
+    private boolean isReady = false;
+    private boolean isGuest = false;
+    private boolean inRoom = false;
+
+    /* Guest 일 시 User 에서 게스트 아이디 처리했음 */
+    public Player(String id, String nickname, String picture, String sessionID, boolean isGuest) {
         this.id = id;
-        this.roomMaster = roomMaster;
-        this.session = session;
+        this.nickname = nickname;
+        this.picture = picture;
+        this.sessionID = sessionID;
         this.isGuest = isGuest;
+
         playerArrayList.add(this);
     }
 
-    public void setExaminer(boolean isExaminer){
-        this.examiner = isExaminer;
+    public String getPicture() {
+        return picture;
     }
 
-    public boolean isExaminer() {
-        return this.examiner;
+    public void setPicture(String picture) {
+        this.picture = picture;
     }
 
-    public void setPlayerScore(int score) {
-        this.playerScore = score;
+    public int getPlayerLevel() {
+        for (User user : User.getUserList()) {
+            if (user.getId().equals(this.getId())) {
+                return user.getLevel();
+            }
+        }
+        return 0;
     }
 
-    public long getPlayerScore() {
-        return this.playerScore;
+    public void setPlayerLevel(int level) {
+        for (User user : User.getUserList()) {
+            if (user.getId().equals(this.getId())) {
+                user.setLevel(level);
+            }
+        }
     }
 
-    public boolean isReady() {
-        return this.isReady;
+    public boolean isInRoom() {
+        return inRoom;
     }
 
-    public void setReady(boolean ready) {
-        this.isReady = ready;
+    public void setInRoom(boolean inRoom) {
+        this.inRoom = inRoom;
     }
 
-    public void setRoomMaster(boolean roomMaster) {
-        this.roomMaster = roomMaster;
+    public String getNickname() {
+        return nickname;
     }
 
-    public boolean isRoomMaster() {
-        return this.roomMaster;
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
+    }
+
+    public static ArrayList<Player> getPlayerArrayList() {
+        return playerArrayList;
     }
 
     public String getId() {
-        return this.id;
+        return id;
     }
 
-    public Session getSession() {
-        return this.session;
+    public void setId(String id) {
+        this.id = id;
     }
 
-    public static ArrayList<Player> getPlayerList() {
-        return Player.playerArrayList;
+    public String getSessionID() {
+        return sessionID;
+    }
+
+    public void setSessionID(String sessionID) {
+        this.sessionID = sessionID;
+    }
+
+    public int getScore() {
+        return score;
+    }
+
+    public void setScore(int score) {
+        this.score = score;
+    }
+
+    public void addScore(int score) {
+        this.score += score;
+    }
+
+    public void minusScore(int score) {
+        this.score -= score;
+    }
+
+    public boolean isMaster() {
+        return isMaster;
+    }
+
+    public void setMaster(boolean master) {
+        isMaster = master;
+    }
+
+    public boolean isExaminer() {
+        return isExaminer;
+    }
+
+    public void setExaminer(boolean examiner) {
+        isExaminer = examiner;
+    }
+
+    public boolean isReady() {
+        return isReady;
+    }
+
+    public void setReady(boolean ready) {
+        isReady = ready;
+    }
+
+    public boolean isGuest() {
+        return isGuest;
+    }
+
+    public void setGuest(boolean guest) {
+        isGuest = guest;
     }
 }

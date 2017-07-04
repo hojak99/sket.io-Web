@@ -1,43 +1,80 @@
-import React, { Component, PropTypes } from 'react';
-import { connect } from 'react-redux';
+import React, { Component } from 'react';
+import { PropTypes as ReactPropTypes } from 'prop-types';
 
-import Login from '../components/Index/Login';
 import UserProfile from '../components/Index/UserProfile';
 import FuncButtonArea from '../components/Index/FuncButtonArea';
 import RoomList from '../components/Index/RoomList';
 import ConnectingUserList from '../components/Index/ConnectingUserList';
 
 
+function createWarning(funcName) {
+    return () => console.warn(funcName + ' is not defined in IndexContent');
+}
 
 const propTypes = {
+    user: ReactPropTypes.object,
+
+    userList: ReactPropTypes.array,
+    roomList: ReactPropTypes.array,
+    ranking: ReactPropTypes.object,
+
+    handleLogout: ReactPropTypes.func,
+    handleCreateRoom: ReactPropTypes.func,
+    handleQuickStart: ReactPropTypes.func,
+    handleShowRanking: ReactPropTypes.func,
+    handleEnterRoom: ReactPropTypes.func,
+
+    isShowRanking: ReactPropTypes.bool
 };
 
 const defaultProps = {
+    user: {},
+
+    userList: [],
+    roomList: [],
+    ranking: {},
+
+    handleLogout: createWarning('handleLogout'),
+    handleCreateRoom: createWarning('handleCreateRoom'),
+    handleQuickStart: createWarning('handleQuickStart'),
+    handleShowRanking: createWarning('handleShowRanking'),
+    handleEnterRoom: createWarning('handleEnterRoom'),
+
+    isShowRanking: false
 };
 
 class IndexContent extends Component {
     constructor(props) {
         super(props);
-
-        // this.handleModalUsage = this.props.handleModalUsage.bind(this);
     }
-    // <Login
-    //     onClick={ () => this.handleModalUsage("LOGIN")}
-    //     modalUsage={this.props.usage}
-    //     className="login"
-    //     />
 
     render() {
         return(
-            <div className="content">
-
+            <div className="sket-index">
                 <div className="container">
-                    <UserProfile />
-                    <FuncButtonArea
-                        handleModal={this.handleModalUsage}
+                    <UserProfile
+                        user={ this.props.user }
                     />
-                    <RoomList/>
-                    <ConnectingUserList/>
+
+                    <FuncButtonArea
+                        handleCreateRoom={ this.props.handleCreateRoom }
+                        handleQuickStart={ this.props.handleQuickStart }
+                        handleShowRanking={ this.props.handleShowRanking }
+                        isShowRanking={ this.props.isShowRanking }
+                        userId={ this.props.user.id }
+                    />
+
+                    <ConnectingUserList
+                        userList={ this.props.userList }
+                    />
+
+                    <RoomList
+                        roomList={ this.props.roomList }
+                        ranking={ this.props.ranking }
+                        isShowRanking={ this.props.isShowRanking }
+                        handleEnterRoom={ this.props.handleEnterRoom }
+                        userId={ this.props.user.id }
+                    />
                 </div>
 
             </div>

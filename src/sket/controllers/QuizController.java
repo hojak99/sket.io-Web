@@ -1,65 +1,88 @@
 package sket.controllers;
 
 import org.json.JSONObject;
+import sket.db.DBConnection;
 import sket.model.action.PlayerAction;
+import sket.model.action.RoomAction;
 import sket.model.data.Player;
+import sket.model.data.Room;
 
 import javax.servlet.http.HttpServlet;
+import java.util.Arrays;
 
 public class QuizController extends HttpServlet {
     public QuizController() {
         super();
     }
 
+    /* 문제 당 남은 시간을 측정하도록 문제 시작을 json으로 전송 */
+    public static String alarmStartQuiz() {
+        JSONObject message = new JSONObject();
+        message.put("type", "START_QUIZ");
+
+        return message.toString();
+    }
+
     /* 랜덤 퀴즈를 json 으로 반환하는 메소드 */
-
-    public static String sendQuizByJSON() {
-        String quiz = null;
-
+    public static JSONObject sendQuizByJSON(Room targetRoom, String userId) {
         JSONObject message = new JSONObject();
-        message.put("type", "randomQuiz");
-        message.put("quiz", quiz);
+        JSONObject data = new JSONObject();
+        targetRoom.addCurRound();
 
-        return message.toString();
-    }
+        System.out.println(targetRoom.getCurRound() + "    " + targetRoom.getRoundLimit());
+        if (targetRoom.getCurRound() <= targetRoom.getRoundLimit()) {
+            DBConnection db = new DBConnection();
+            String quiz = db.selectQuiz();
 
-    /* 문제 맞춘 사람, 출제자, score 작업해서 json 으로 반환 */
-    public static String correctAnswer(String correctId, String examinerId, int playerScore) {
-        Player targetPlayer = PlayerAction.getEqualPlayerId(correctId);
-        Player examinerPlayer = PlayerAction.getEqualPlayerId(examinerId);
-
-        targetPlayer.setPlayerScore(playerScore);
-        String message = correctAnswerByJSON(targetPlayer, examinerPlayer, playerScore);
-
-        if (message != null) {
-            return message;
+            data.put("gameEnd", "false");
+            data.put("id", userId);
+            data.put("round", targetRoom.getCurRound());
+            data.put("quiz", quiz);
+            targetRoom.setAnswer(quiz);
         } else {
-            return null;
+            data.put("gameEnd", "true");
         }
-    }
 
-    /* correctAnswer 메소드를 위한 json 반환 메소드 */
-    private static String correctAnswerByJSON(Player correctP, Player examinerP, int score) {
-        correctP.setExaminer(true);
-        examinerP.setExaminer(false);
-
-        JSONObject message = new JSONObject();
-        message.put("type", "correctAnswer");
-        message.put("correcterId", correctP.getId());
-        message.put("examinerId", examinerP.getId());
-        message.put("score", score);
-
-        return message.toString();
-    }
-
-    public static String sendCanvasData() {
-        String data = null;
-
-        JSONObject message = new JSONObject();
-        message.put("type", "canvasData");
+        message.put("type", "RANDOM_QUIZ");
         message.put("data", data);
-        // TODO: data 받고 JS의 redraw()실행
+        return message;
+    }
 
-        return message.toString();
+    /* 문제 맞춘 시간에 따라 점수 측정 */
+    public static int getScore(int total, int cur) {
+        // 한 문제당 100점
+        int addScore;
+        if(cur==0)
+            addScore = total;
+        else
+            addScore = total / cur * 100;
+
+        return addScore;
+    }
+
+    /* 게임 종료 후 경험치 더해줌 */
+    public static Arrays gamendJson(Arrays scoreInfo) {
+        return scoreInfo;
+    }
+
+    /* 점수를 경험치로 계산함 */
+    private int calcExp(int gotScore) {
+        int exp=0;
+        return exp;
+    }
+
+    /* 문제 맞춘 사람 점수 더해줌 */
+    public static void addScore(String correctId, int addScore) {
+        Player targetPlayer = PlayerAction.getEqualPlayerId(correctId);
+
+        targetPlayer.addScore(addScore);
+    }
+
+    /* 전체 점수 감점 */
+    public static void minusScore(int roomId, int minusScore) {
+        Room targetRoom = RoomAction.findRoomById(roomId);
+        for (Player player : Room.getRoomIntoPlayer(targetRoom)) {
+            player.minusScore(minusScore);
+        }
     }
 }
